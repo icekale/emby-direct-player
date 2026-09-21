@@ -611,7 +611,7 @@ async function dpPlay(playbackData, extraData, itemId) {
 function dpShowConfig() {
     const cur = dpConf();
     const mode = prompt(
-        "直连播放器模式（详情页那三个按钮不受这里影响，它们各自指定播放器）：\njriver = JRiver Media Center（MCWS）\nmpc = MPC-HC（需先装 etlp-mpc 协议中继）\nmpv = MPV（需装同一个中继，它会连 etlp-mpv 也一起注册）",
+        "直连播放器模式（详情页那三个按钮不受这里影响，它们各自指定播放器）：\njriver = JRiver Media Center（MCWS）\nmpc = MPC-HC（需先装 etlp-mpc 协议中继）\nmpv = MPV（需装同一个中继，它会连 etlp-mpv 也一起注册）\n\n中继下载（Windows 单文件，双击就是设置窗口）：\nhttps://github.com/icekale/emby-direct-player/releases/latest/download/etlp-relay.exe",
         cur.mode,
     );
     if (mode !== null) dpStore.set(dpKeys.mode, mode.trim().toLowerCase());

@@ -14,6 +14,8 @@
 | `etlp-relay.exe` | **推荐**：中继器 + 设置窗口（双击就是设置界面：注册协议、找播放器、看日志） |
 | `direct_module.js` / `build.py` / `selftest.mjs` | 源码：补丁模块、构建脚本、自检 |
 
+**下载 `etlp-relay.exe`**：[Releases 页面](https://github.com/icekale/emby-direct-player/releases/latest) → **Assets** 里的 `etlp-relay.exe`（Windows 64 位，单文件免安装，约 10 MB，不需要 Python / .NET / PowerShell）。原始下载直链：`https://github.com/icekale/emby-direct-player/releases/latest/download/etlp-relay.exe`（这个地址永远指向最新版，可以直接贴给别人）。
+
 ## 安装
 
 1. 导入 `embyToLocalPlayer.direct.user.js`（Tampermonkey → 添加新脚本 → 粘贴/导入；或从 [GreasyFork](https://greasyfork.org/zh-CN/scripts/596811-embytolocalplayer-%E7%9B%B4%E8%BF%9E%E7%89%88) 安装，那边跟着这个仓库自动同步）（脚本已含 `@connect localhost` / `@connect *`，不然读不到本地播放器）。
@@ -32,7 +34,7 @@
 
 ## 设置窗口（不想敲命令就用它）
 
-**双击 `etlp-relay.exe`**（或 `etlp-relay.exe -Gui`）：直接弹 **Windows 原生窗口**，没有命令行黑框。
+**双击 `etlp-relay.exe`**（[下载](https://github.com/icekale/emby-direct-player/releases/latest/download/etlp-relay.exe)）（或 `etlp-relay.exe -Gui`）：直接弹 **Windows 原生窗口**，没有命令行黑框。
 
 - 播放器路径：**浏览…** 选 exe，或点 **找找看** 深度扫盘自动填（几十秒；扫完把第一个结果填进路径框）
 - JRiver：地址 + 访问密钥 + **测试连接**（这一步是真去问 MC 的 `MCWS/v1/Alive`）。**播放本身不经过中继**（MC 常驻，脚本直接用 HTTP 指挥它），所以这里只是帮你看「通不通、密钥对不对」——浏览器直连 `127.0.0.1:52199` 会撞 CORS/混合内容，中继没这个限制
@@ -68,7 +70,7 @@
 两步：
 
 1. MPC-HC → 选项 → **网页界面** → 勾选「监听端口」（默认 13579）。进度回传和续播定位都靠它。
-2. 装中继（一次性，**不需要管理员**，装完重启浏览器）：**双击 `etlp-relay.exe`** → 设置窗口里用「找找看」或「浏览…」选好 `mpc-hc64.exe` → 点「保存并注册协议」。
+2. 装中继（一次性，**不需要管理员**，装完重启浏览器）：[下载 `etlp-relay.exe`](https://github.com/icekale/emby-direct-player/releases/latest/download/etlp-relay.exe) → **双击它** → 设置窗口里用「找找看」或「浏览…」选好 `mpc-hc64.exe` → 点「保存并注册协议」。
 
    窗口做两件事：把 `etlp-mpc:` / `etlp-mpv:` 两个协议注册到 HKCU（指向这个 exe），以及找 `mpc-hc64.exe` / `mpv.exe`（App Paths 注册表 → PATH → 常见安装路径 → K-Lite 自带路径）。找不到就用命令行补路径：
 

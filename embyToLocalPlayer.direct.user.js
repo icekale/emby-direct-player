@@ -31,13 +31,13 @@
 // @connect      *
 // @license MIT
 // ==/UserScript==
-
+'use strict';
 /*global ApiClient*/
 
-(() => {
-    
+(function () {
+    'use strict';
     let fistTime = true;
-    const config = {
+    let config = {
         logLevel: 2,
         disableOpenFolder: undefined, // undefined 改为 true 则禁用打开文件夹的按钮。
         crackFullPath: undefined,
@@ -46,7 +46,7 @@
         resumeHideSomeSeries: undefined, // undefined 改为 true 则启用隐藏特定电视剧的油猴功能菜单。
     };
 
-    const etlpStorageKeys = {
+    let etlpStorageKeys = {
         webPlayerEnable: 'webPlayerEnable',
         mountDiskEnable: 'mountDiskEnable',
         crackFullPath: 'etlpCrackFullPath',
@@ -57,18 +57,18 @@
 
     const originFetch = fetch;
 
-    const logger = {
-        error: (...args) => {
+    let logger = {
+        error: function (...args) {
             if (config.logLevel >= 1) {
                 console.log('%cERROR', 'color: #fff; background: #d32f2f; font-weight: bold; padding: 2px 6px; border-radius: 3px;', ...args);
             }
         },
-        info: (...args) => {
+        info: function (...args) {
             if (config.logLevel >= 2) {
                 console.log('%cINFO', 'color: #fff; background: #1976d2; font-weight: bold; padding: 2px 6px; border-radius: 3px;', ...args);
             }
         },
-        debug: (...args) => {
+        debug: function (...args) {
             if (config.logLevel >= 3) {
                 console.log('%cDEBUG', 'color: #333; background: #ffeb3b; font-weight: bold; padding: 2px 6px; border-radius: 3px;', ...args);
             }
@@ -104,7 +104,7 @@
 
     function overwriteConfByStore() {
         function overwriteByKey(confKey) {
-            const confLocal = localStorage.getItem(confKey);
+            let confLocal = localStorage.getItem(confKey);
             if (confLocal == null) return;
             if (confLocal == 'true') {
                 GM_setValue(confKey, true);
@@ -112,7 +112,7 @@
             } else if (confLocal == 'false') {
                 GM_setValue(confKey, false);
             }
-            const confGM = GM_getValue(confKey, null);
+            let confGM = GM_getValue(confKey, null);
             if (confGM !== null) {
                 // 注意：etlpResumeHideSomeSeries 转换为 resumeHideSomeSeries。
                 let _confKey = confKey.replace(/^etlp/, '');
@@ -166,12 +166,12 @@
         }, 3000);
     }
 
-    const menuRegistry = [];
+    let menuRegistry = [];
     let registeredMenus = [];
 
     function switchLocalStorage(key, defaultValue = 'true', trueValue = 'true', falseValue = 'false') {
         if (key in localStorage) {
-            const value = (localStorage.getItem(key) === trueValue) ? falseValue : trueValue;
+            let value = (localStorage.getItem(key) === trueValue) ? falseValue : trueValue;
             localStorage.setItem(key, value);
         } else {
             localStorage.setItem(key, defaultValue);
@@ -187,7 +187,7 @@
             let id;
 
             if (item.type === 'switch') {
-                const title = item.menuStart + item.switchNameMap[localStorage.getItem(item.storageKey)] + item.menuEnd;
+                let title = item.menuStart + item.switchNameMap[localStorage.getItem(item.storageKey)] + item.menuEnd;
                 id = GM_registerMenuCommand(title, () => {
                     switchLocalStorage(item.storageKey);
                     registerAllMenus(); // 刷新菜单显示
@@ -202,7 +202,7 @@
     }
 
     function setModeSwitchMenu(storageKey, menuStart = '', menuEnd = '', defaultValue = '关闭', trueValue = '开启', falseValue = '关闭') {
-        const switchNameMap = { 'true': trueValue, 'false': falseValue, null: defaultValue };
+        let switchNameMap = { 'true': trueValue, 'false': falseValue, null: defaultValue };
 
         menuRegistry.push({
             type: 'switch',
@@ -227,7 +227,7 @@
 
     function hideCurrentSeries() {
         const urlMatch = window.location.href.match(/id=(\d+)/);
-        const hint = '请在需要隐藏的电视剧【条目根页面】操作';
+        let hint = '请在需要隐藏的电视剧【条目根页面】操作';
         if (!urlMatch) {
             alert(hint);
             return;
@@ -250,13 +250,13 @@
             }
         }
 
-        if (hideList.includes(seriesId)) {
-            alert('该电视剧已在隐藏列表中');
-        } else {
+        if (!hideList.includes(seriesId)) {
             hideList.push(seriesId);
             localStorage.setItem(etlpStorageKeys.hideSeriesIds, JSON.stringify(hideList));
             logger.info('已隐藏电视剧, SeriesId:', seriesId);
             alert(`已隐藏该电视剧，注意要电视剧条目主页面操作 SeriesId=${seriesId}`);
+        } else {
+            alert('该电视剧已在隐藏列表中');
         }
     }
 
@@ -267,7 +267,7 @@
     }
 
     function removeErrorWindows() {
-        const okButtonList = document.querySelectorAll('button[data-id="ok"]');
+        let okButtonList = document.querySelectorAll('button[data-id="ok"]');
         let state = false;
         for (let index = 0; index < okButtonList.length; index++) {
             const element = okButtonList[index];
@@ -278,15 +278,15 @@
             }
         }
 
-        const jellyfinSpinner = document.querySelector('div.docspinner');
+        let jellyfinSpinner = document.querySelector('div.docspinner');
         if (jellyfinSpinner) {
             jellyfinSpinner.remove();
             state = true;
         };
 
-        const plexErrorSelector = '[class*="Modal-small"] [class*="ModalContent-modalContent"] [class*="PlayerErrorModal-modalHeader"]';
+        let plexErrorSelector = '[class*="Modal-small"] [class*="ModalContent-modalContent"] [class*="PlayerErrorModal-modalHeader"]';
         if (document.querySelector(plexErrorSelector)) {
-            const escEvent = new KeyboardEvent('keydown', {
+            let escEvent = new KeyboardEvent('keydown', {
                 key: 'Escape',
                 keyCode: 27,
                 code: 'Escape',
@@ -311,7 +311,7 @@
     }
 
     function sendDataToLocalServer(data, path) {
-        const url = `http://127.0.0.1:58000/${path}/`;
+        let url = `http://127.0.0.1:58000/${path}/`;
         GM_xmlhttpRequest({
             method: 'POST',
             url: url,
@@ -319,7 +319,7 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            onerror: (error) => {
+            onerror: function (error) {
                 alert(`${url}\n请求错误，本地服务未运行，请查看使用说明。\nhttps://github.com/kjtsune/embyToLocalPlayer`);
                 console.error('请求错误:', error);
             }
@@ -630,7 +630,7 @@ async function dpJriverProbe() {
             played = await dpJriverPlaying(conf, id);
             if (!played) await dpSleep(700);
         }
-        txt += `\n\n起播了？${id ? played ? "是 ✅（就是它，告诉我）" : "否" : "拿不到条目 id，看不出"}`;
+        txt += `\n\n起播了？${!id ? "拿不到条目 id，看不出" : played ? "是 ✅（就是它，告诉我）" : "否"}`;
     }
     dpStore.set(dpKeys.probeIdx, String(i + 1));
     const tail = preMcc
@@ -940,7 +940,7 @@ async function dpPlay(playbackData, extraData, itemId) {
 function dpShowConfig() {
     const cur = dpConf();
     const mode = prompt(
-        "直连播放器模式（详情页那三个按钮不受这里影响，它们各自指定播放器）：\njriver = JRiver Media Center（MCWS）\nmpc = MPC-HC（需先装 etlp-mpc 协议中继）\nmpv = MPV（需装同一个中继，它会连 etlp-mpv 也一起注册）",
+        "直连播放器模式（详情页那三个按钮不受这里影响，它们各自指定播放器）：\njriver = JRiver Media Center（MCWS）\nmpc = MPC-HC（需先装 etlp-mpc 协议中继）\nmpv = MPV（需装同一个中继，它会连 etlp-mpv 也一起注册）\n\n中继下载（Windows 单文件，双击就是设置窗口）：\nhttps://github.com/icekale/emby-direct-player/releases/latest/download/etlp-relay.exe",
         cur.mode,
     );
     if (mode !== null) dpStore.set(dpKeys.mode, mode.trim().toLowerCase());
@@ -1193,7 +1193,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
 
     let serverName = null;
     let episodesInfoCache = []; // ['type:[Episodes|NextUp|Items]', resp]
-    const episodesInfoRe = /\/Episodes\?IsVirtual|\/NextUp\?Series|\/Items\?ParentId=\w+&Filters=IsNotFolder&Recursive=true/; // Items已排除播放列表
+    let episodesInfoRe = /\/Episodes\?IsVirtual|\/NextUp\?Series|\/Items\?ParentId=\w+&Filters=IsNotFolder&Recursive=true/; // Items已排除播放列表
     // 点击位置：Episodes 继续观看，如果是即将观看，可能只有一集的信息 | NextUp 新播放或媒体库播放 | Items 季播放。 只有 Episodes 返回所有集的数据。
     let playlistInfoCache = null;
     let resumeRawInfoCache = null;
@@ -1203,7 +1203,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
     let allItemDataCache = {};
     let episodesWithPathCache = {};
 
-    const metadataChangeRe = /\/MetadataEditor|\/Refresh\?/;
+    let metadataChangeRe = /\/MetadataEditor|\/Refresh\?/;
     let metadataMayChange = false;
 
     function cleanOptionalCache() {
@@ -1227,7 +1227,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
         };
     }
 
-    const addOpenFolderElement = throttle(_addOpenFolderElement, 100);
+    let addOpenFolderElement = throttle(_addOpenFolderElement, 100);
 
     async function _addOpenFolderElement(itemId) {
         if (config.disableOpenFolder) return;
@@ -1238,19 +1238,19 @@ window.setInterval(dpSyncDetailButtons, 1500);
             if (mediaSources) break;
         }
         if (!mediaSources) return;
-        const pathDiv = mediaSources.querySelector('div[class^="sectionTitle sectionTitle-cards"] > div');
+        let pathDiv = mediaSources.querySelector('div[class^="sectionTitle sectionTitle-cards"] > div');
         if (!pathDiv || pathDiv.className == 'mediaInfoItems' || pathDiv.id == 'addFileNameElement') return;
         let full_path = pathDiv.textContent;
         if (!full_path.match(/[\\/:]/)) return;
         if (full_path.match(/\d{1,3}\.?\d{0,2} (MB|GB)/)) return;
 
-        const itemData = (itemId in allItemDataCache) ? allItemDataCache[itemId] : null
-        const strmFile = (full_path.startsWith('http')) ? itemData?.Path : null
+        let itemData = (itemId in allItemDataCache) ? allItemDataCache[itemId] : null
+        let strmFile = (full_path.startsWith('http')) ? itemData?.Path : null
 
-        const openButtonHtml = `<a id="openFolderButton" is="emby-linkbutton" class="raised item-tag-button 
+        let openButtonHtml = `<a id="openFolderButton" is="emby-linkbutton" class="raised item-tag-button 
         nobackdropfilter emby-button" ><i class="md-icon button-icon button-icon-left">link</i>Open Folder</a>`
         pathDiv.insertAdjacentHTML('beforebegin', openButtonHtml);
-        const btn = mediaSources.querySelector('a#openFolderButton');
+        let btn = mediaSources.querySelector('a#openFolderButton');
         if (strmFile) {
             pathDiv.innerHTML = pathDiv.innerHTML + '<br>' + strmFile;
             full_path = strmFile; // emby 会把 strm 内的链接当路径展示
@@ -1272,10 +1272,10 @@ window.setInterval(dpSyncDetailButtons, 1500);
         let pathDivs = mediaSources.querySelectorAll('div[class^="sectionTitle sectionTitle-cards"] > div');
         if (!pathDivs) return;
         pathDivs = Array.from(pathDivs);
-        const _pathDiv = pathDivs[0];
+        let _pathDiv = pathDivs[0];
         if (_pathDiv.id == 'addFileNameElement') return;
-        const isAdmin = !/\d{4}\/\d+\/\d+/.test(_pathDiv.textContent); // 非管理员只有包含添加日期的文件类型 div
-        const isStrm = _pathDiv.textContent.startsWith('http');
+        let isAdmin = !/\d{4}\/\d+\/\d+/.test(_pathDiv.textContent); // 非管理员只有包含添加日期的文件类型 div
+        let isStrm = _pathDiv.textContent.startsWith('http');
         if (isAdmin) {
             if (!isStrm) { return; }
             pathDivs = pathDivs.filter((_, index) => index % 2 === 0); // 管理员一个文件同时有路径和文件类型两个 div
@@ -1286,8 +1286,8 @@ window.setInterval(dpSyncDetailButtons, 1500);
         for (let index = 0; index < pathDivs.length; index++) {
             const pathDiv = pathDivs[index];
             let fileName = sources[index].Name; // 多版本的话，是版本名。
-            const filePath = sources[index].Path;
-            const strmFile = filePath.startsWith('http');
+            let filePath = sources[index].Path;
+            let strmFile = filePath.startsWith('http');
             if (!strmFile) {
                 fileName = filePath.split('\\').pop().split('/').pop();
                 fileName = (config.crackFullPath && !isAdmin) ? filePath : fileName;
@@ -1303,9 +1303,9 @@ window.setInterval(dpSyncDetailButtons, 1500);
     function makeItemIdCorrect(itemId) {
         if (serverName !== 'emby') { return itemId; }
         if (!resumeRawInfoCache || !episodesInfoCache) { return itemId; }
-        const resumeIds = resumeRawInfoCache.map(item => item.Id);
+        let resumeIds = resumeRawInfoCache.map(item => item.Id);
         if (resumeIds.includes(itemId)) { return itemId; }
-        const pageId = window.location.href.match(/\/item\?id=(\d+)/)?.[1];
+        let pageId = window.location.href.match(/\/item\?id=(\d+)/)?.[1];
         if (resumeIds.includes(pageId) && itemId == episodesInfoCache[0].Id) {
             // 解决从继续观看进入集详情页时，并非播放第一集，却请求首集视频文件信息导致无法播放。
             // 手动解决方法：从下方集卡片点击播放，或从集卡片再次进入集详情页后播放。
@@ -1316,8 +1316,8 @@ window.setInterval(dpSyncDetailButtons, 1500);
         } else if (window.location.href.match(/serverId=/)) {
             return itemId; // 仅处理首页继续观看和集详情页，其他页面忽略。
         }
-        const correctSeaId = episodesInfoCache.find(item => item.Id == itemId)?.SeasonId;
-        const correctItemId = resumeRawInfoCache.find(item => item.SeasonId == correctSeaId)?.Id;
+        let correctSeaId = episodesInfoCache.find(item => item.Id == itemId)?.SeasonId;
+        let correctItemId = resumeRawInfoCache.find(item => item.SeasonId == correctSeaId)?.Id;
         if (correctSeaId && correctItemId) {
             logger.info(`makeItemIdCorrect, old=${itemId}, new=${correctItemId}`)
             return correctItemId;
@@ -1326,7 +1326,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
     }
 
     async function embyToLocalPlayer(playbackUrl, request, playbackData, extraData) {
-        const data = {
+        let data = {
             ApiClient: ApiClient,
             playbackData: playbackData,
             playbackUrl: playbackUrl,
@@ -1361,8 +1361,8 @@ window.setInterval(dpSyncDetailButtons, 1500);
                 break;
             case 'getEpisodes':
                 {
-                    const seasonId = itemId;
-                    const options = {
+                    let seasonId = itemId;
+                    let options = {
                         'Fields': 'MediaSources,Path,ProviderIds',
                         'SeasonId': seasonId,
                     }
@@ -1375,7 +1375,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
         for (const cache of cacheList) {
             if (funName == 'getPlaybackInfo') {
                 // strm ffprobe 处理前后的外挂字幕 index 会变化，故不缓存。
-                const runtime = resInfo?.MediaSources?.[0]?.RunTimeTicks;
+                let runtime = resInfo?.MediaSources?.[0]?.RunTimeTicks;
                 if (!runtime)
                     break;
             }
@@ -1398,7 +1398,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
 
     async function dealWithPlaybackInfo(raw_url, url, options) {
         console.time('dealWithPlaybackInfo');
-        const rawId = url.match(/\/Items\/(\w+)\/PlaybackInfo/)[1];
+        let rawId = url.match(/\/Items\/(\w+)\/PlaybackInfo/)[1];
         episodesInfoCache = episodesInfoCache[0] ? episodesInfoCache[1].clone() : null;
         let itemId = rawId;
         let [playbackData, mainEpInfo, episodesInfoData] = await Promise.all([
@@ -1409,7 +1409,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
         console.timeEnd('dealWithPlaybackInfo');
         episodesInfoData = (episodesInfoData && episodesInfoData.Items) ? episodesInfoData.Items : null;
         episodesInfoCache = episodesInfoData;
-        const correctId = makeItemIdCorrect(itemId);
+        let correctId = makeItemIdCorrect(itemId);
         url = url.replace(`/${rawId}/`, `/${correctId}/`)
         if (itemId != correctId) {
             itemId = correctId;
@@ -1417,12 +1417,12 @@ window.setInterval(dpSyncDetailButtons, 1500);
                 getPlaybackWithCace(itemId),
                 getItemInfoWithCace(itemId),
             ]);
-            const startPos = mainEpInfo.UserData.PlaybackPositionTicks;
+            let startPos = mainEpInfo.UserData.PlaybackPositionTicks;
             url = url.replace('StartTimeTicks=0', `StartTimeTicks=${startPos}`);
         }
-        const playlistData = (playlistInfoCache && playlistInfoCache.Items) ? playlistInfoCache.Items : null;
+        let playlistData = (playlistInfoCache && playlistInfoCache.Items) ? playlistInfoCache.Items : null;
         episodesInfoCache = []
-        const extraData = {
+        let extraData = {
             mainEpInfo: mainEpInfo,
             episodesInfo: episodesInfoData,
             playlistInfo: playlistData,
@@ -1437,9 +1437,9 @@ window.setInterval(dpSyncDetailButtons, 1500);
             return false;
         }
         if (config.disableForLiveTv && mainEpInfo?.Type == 'TvChannel') { return 'disableForLiveTv'; }
-        const notBackdrop = Boolean(playbackData.MediaSources[0].Path.search(/\Wbackdrop/i) == -1);
+        let notBackdrop = Boolean(playbackData.MediaSources[0].Path.search(/\Wbackdrop/i) == -1);
         if (notBackdrop) {
-            const _req = options ? options : raw_url;
+            let _req = options ? options : raw_url;
             if (dpEnabled()) {
                 dpPlay(playbackData, extraData, itemId).catch(e => {
                     logger.error('直连: 播放异常', e);
@@ -1455,34 +1455,34 @@ window.setInterval(dpSyncDetailButtons, 1500);
     }
 
     async function deailWithItemInfo(item) {
-        const itemId = item.Id;
-        const seasonId = item.SeasonId;
+        let itemId = item.Id;
+        let seasonId = item.SeasonId;
 
-        const [mainEpInfo, playbackData, episodesInfoData] = await Promise.all([
+        let [mainEpInfo, playbackData, episodesInfoData] = await Promise.all([
             getItemInfoWithCace(itemId),
             getPlaybackWithCace(itemId),
             (seasonId) ? getEpisodesWithCace(seasonId) : null,
         ]);
 
-        const positonTicks = item.UserData.PlaybackPositionTicks;
-        const userId = ApiClient._serverInfo.UserId;
-        const deviceId = ApiClient._deviceId;
-        const accessToken = ApiClient._userAuthInfo?.AccessToken || ApiClient._serverInfo?.AccessToken;
+        let positonTicks = item.UserData.PlaybackPositionTicks;
+        let userId = ApiClient._serverInfo.UserId;
+        let deviceId = ApiClient._deviceId;
+        let accessToken = ApiClient._userAuthInfo?.AccessToken || ApiClient._serverInfo?.AccessToken;
         if (!accessToken) {
             playNotifiy('Not accessToken');
         }
-        const urlParams = {
+        let urlParams = {
             'X-Emby-Device-Id': deviceId,
             'StartTimeTicks': positonTicks,
             'X-Emby-Token': accessToken,
             'UserId': userId,
             'IsPlayback': true
         };
-        const baseUrl = `${window.location.origin}/emby/Items/${itemId}/PlaybackInfo`;
-        const searchParams = new URLSearchParams(urlParams);
-        const playbackUrl = `${baseUrl}?${searchParams.toString()}`;
-        const episodesInfo = episodesInfoData?.Items || [];
-        const extraData = {
+        let baseUrl = `${window.location.origin}/emby/Items/${itemId}/PlaybackInfo`;
+        let searchParams = new URLSearchParams(urlParams);
+        let playbackUrl = `${baseUrl}?${searchParams.toString()}`;
+        let episodesInfo = episodesInfoData?.Items || [];
+        let extraData = {
             mainEpInfo: mainEpInfo,
             episodesInfo: episodesInfo,
             playlistInfo: [],
@@ -1526,7 +1526,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
         const itemList = container._itemSource || container.items;
         const item = itemList[index];
         const action = playButton.dataset.action || playButton.dataset.mode;
-        const itemType = item.Type;
+        let itemType = item.Type;
         if (!['Movie', 'Episode'].includes(itemType)) {
             logger.info('🎬 Play button clicked, but not within legal itemType.');
             return
@@ -1535,15 +1535,15 @@ window.setInterval(dpSyncDetailButtons, 1500);
         e.preventDefault();
         e.stopImmediatePropagation();
         deailWithItemInfo(item);
-        const title = item.SeriesName || item.Name;
-        const subTitle = item.SeriesName && item.Name || item.ProductionYear;
+        let title = item.SeriesName || item.Name;
+        let subTitle = item.SeriesName && item.Name || item.ProductionYear;
         playNotifiy(title, subTitle);
     }, true);
 
     async function cacheResumeItemInfo() {
-        const inInit = !myBool(resumeRawInfoCache);
+        let inInit = !myBool(resumeRawInfoCache);
         let resumeIds;
-        const storageKey = etlpStorageKeys.cacheResumeIds;
+        let storageKey = etlpStorageKeys.cacheResumeIds;
         if (inInit) {
             resumeIds = localStorage.getItem(storageKey)
             if (resumeIds) {
@@ -1553,7 +1553,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
             }
         } else {
             resumeIds = resumeRawInfoCache.slice(0, 5).map(item => item.Id);
-            const seasonIds = resumeRawInfoCache.slice(0, 5).map(item => item.SeasonId);
+            let seasonIds = resumeRawInfoCache.slice(0, 5).map(item => item.SeasonId);
             await Promise.all(seasonIds.filter(Boolean).map(sid => getEpisodesWithCace(sid)));
             localStorage.setItem(storageKey, JSON.stringify(resumeIds));
         }
@@ -1565,7 +1565,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
                 resumeIds = resumeIds.filter(id => !(id in globalCache));
                 if (resumeIds.length == 0) { return; }
             }
-            const itemInfoList = await Promise.all(
+            let itemInfoList = await Promise.all(
                 resumeIds.map(id => getFun(id))
             )
             globalCache = itemInfoList.reduce((acc, result, index) => {
@@ -1586,18 +1586,20 @@ window.setInterval(dpSyncDetailButtons, 1500);
         }
     }
 
-    const itemInfoRe = /\/Items\/(\w+)\?/; // 要严格些，不然手动标记已播放 PlayedItems 也会命中，造成缓存错误数据。
+    let itemInfoRe = /\/Items\/(\w+)\?/; // 要严格些，不然手动标记已播放 PlayedItems 也会命中，造成缓存错误数据。
 
     unsafeWindow.fetch = async (input, options) => {
-        const isStrInput = typeof input === 'string';
-        const urlStr = isStrInput ? input : input.url;
+        let isStrInput = typeof input === 'string';
+        let urlStr = isStrInput ? input : input.url;
 
         if (serverName === null) {
             serverName = typeof ApiClient === 'undefined' ? null : ApiClient._appName.split(' ')[0].toLowerCase();
-        } else if (typeof ApiClient != 'undefined' && ApiClient._deviceName != 'embyToLocalPlayer' && localStorage.getItem(etlpStorageKeys.webPlayerEnable) != 'true') {
+        } else {
+            if (typeof ApiClient != 'undefined' && ApiClient._deviceName != 'embyToLocalPlayer' && localStorage.getItem(etlpStorageKeys.webPlayerEnable) != 'true') {
                 ApiClient._deviceName = 'embyToLocalPlayer'
                 cacheResumeItemInfo();
             }
+        }
         if (metadataMayChange && urlStr.includes('Items')) {
             if (urlStr.includes('reqformat') && !urlStr.includes('fields')) {
                 cleanOptionalCache();
@@ -1607,11 +1609,11 @@ window.setInterval(dpSyncDetailButtons, 1500);
         }
         // 适配播放列表及媒体库的全部播放、随机播放。会禁用版本筛选和美化标题。
         if (urlStr.includes('Items?') && /Limit=(300|1000|5\d\d\d)/.test(urlStr)) {
-            const _resp = await originFetch(input, options);
+            let _resp = await originFetch(input, options);
             if (serverName == 'emby') {
                 await ApiClient._userViewsPromise?.then(result => {
-                    const viewsItems = result.Items;
-                    const viewsIds = [];
+                    let viewsItems = result.Items;
+                    let viewsIds = [];
                     viewsItems.forEach(item => {
                         viewsIds.push(item.Id);
                     });
@@ -1629,7 +1631,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
             }
 
             playlistInfoCache = null;
-            const _resd = await _resp.clone().json();
+            let _resd = await _resp.clone().json();
             if (!_resd.Items[0]) {
                 logger.error('playlist is empty, skip');
                 return _resp;
@@ -1644,7 +1646,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
         let _epMatch = urlStr.match(episodesInfoRe);
         if (_epMatch) {
             _epMatch = _epMatch[0].split(['?'])[0].substring(1); // Episodes|NextUp|Items
-            const _resp = await originFetch(input, options);
+            let _resp = await originFetch(input, options);
             episodesInfoCache = [_epMatch, _resp.clone()]
             logger.info('episodesInfoCache', episodesInfoCache);
             return _resp
@@ -1657,10 +1659,10 @@ window.setInterval(dpSyncDetailButtons, 1500);
                 reqUrl = urlStr.replace(/Fields=([^&]*)/, 'Fields=$1,DateCreated');
             }
 
-            const fetchInput = isStrInput ? reqUrl : new Request(reqUrl, input);
+            let fetchInput = isStrInput ? reqUrl : new Request(reqUrl, input);
 
-            const _resp = await originFetch(fetchInput, options);
-            const _resd = await _resp.clone().json();
+            let _resp = await originFetch(fetchInput, options);
+            let _resd = await _resp.clone().json();
 
             // 处理隐藏特定电视剧
             if (config.resumeHideSomeSeries && _resd.Items && _resd.Items.length > 0) {
@@ -1717,8 +1719,8 @@ window.setInterval(dpSyncDetailButtons, 1500);
         }
         // 缓存 itemInfo ，可能匹配到 Items/Resume，故放后面。
         if (urlStr.match(itemInfoRe)) {
-            const itemId = urlStr.match(itemInfoRe)[1];
-            const resp = await originFetch(input, options);
+            let itemId = urlStr.match(itemInfoRe)[1];
+            let resp = await originFetch(input, options);
             logger.info(`CACHE allItemDataCache itemId=${itemId}`);
             cloneAndCacheFetch(resp, itemId, allItemDataCache);
             return resp;
@@ -1726,16 +1728,16 @@ window.setInterval(dpSyncDetailButtons, 1500);
         try {
             if (dpEnabled() && urlStr.indexOf('PlaybackInfo') != -1
                 && /"(IsPlayback|AutoOpenLiveStream)"\s*:\s*true/.test(String((options || {}).body || ''))) {
-                const dealRes = await dealWithPlaybackInfo(input, urlStr, options);
+                let dealRes = await dealWithPlaybackInfo(input, urlStr, options);
                 if (dealRes && dealRes != 'disableForLiveTv') { return; }
             }
             if (urlStr.indexOf('/PlaybackInfo?UserId') != -1) {
                 if (urlStr.indexOf('IsPlayback=true') != -1 && dpIntercept()) {
-                    const dealRes = await dealWithPlaybackInfo(input, urlStr, options);
+                    let dealRes = await dealWithPlaybackInfo(input, urlStr, options);
                     if (dealRes && dealRes != 'disableForLiveTv') { return; }
                 } else {
-                    const itemId = urlStr.match(/\/Items\/(\w+)\/PlaybackInfo/)[1];
-                    const resp = await originFetch(input, options);
+                    let itemId = urlStr.match(/\/Items\/(\w+)\/PlaybackInfo/)[1];
+                    let resp = await originFetch(input, options);
                     addFileNameElement(resp.clone()); // itemId data 不包含多版本的文件信息，故用不到
                     addOpenFolderElement(itemId);
                     logger.info(`CACHE allPlaybackCache itemId=${itemId}`);
@@ -1783,7 +1785,7 @@ window.setInterval(dpSyncDetailButtons, 1500);
             this._headers = {};
 
             if (serverName === null && this._url.indexOf('X-Plex-Product') != -1) { serverName = 'plex' };
-            const catchPlex = (serverName == 'plex' && this._url.indexOf('playQueues?type=video') != -1)
+            let catchPlex = (serverName == 'plex' && this._url.indexOf('playQueues?type=video') != -1)
             if (catchPlex && dpIntercept()) { // Plex
                 fetch(this._url, {
                     method: this._method,
@@ -1793,11 +1795,11 @@ window.setInterval(dpSyncDetailButtons, 1500);
                 })
                     .then(response => response.json())
                     .then((res) => {
-                        const extraData = {
+                        let extraData = {
                             gmInfo: GM_info,
                             userAgent: navigator.userAgent,
                         };
-                        const data = {
+                        let data = {
                             playbackData: res,
                             playbackUrl: this._url,
                             mountDiskEnable: localStorage.getItem(etlpStorageKeys.mountDiskEnable),
@@ -1813,19 +1815,19 @@ window.setInterval(dpSyncDetailButtons, 1500);
 
         XMLHttpRequest.prototype.send = function (body) {
 
-            const catchJellyfin = (this._method === 'POST' && this._url.endsWith('PlaybackInfo'))
+            let catchJellyfin = (this._method === 'POST' && this._url.endsWith('PlaybackInfo'))
             if (catchJellyfin && dpIntercept()) { // Jellyfin 10.10
                 let pbUrl = this._url;
                 body = JSON.parse(body);
-                const _body = {};
+                let _body = {};
                 ['MediaSourceId', 'StartTimeTicks', 'UserId', 'SubtitleStreamIndex', 'AudioStreamIndex',].forEach(key => {
                     if (body[key] != undefined) {
                         _body[key] = body[key];
                     }
                 });
-                const query = new URLSearchParams(_body).toString();
+                let query = new URLSearchParams(_body).toString();
                 pbUrl = `${pbUrl}?${query}`
-                const options = {
+                let options = {
                     headers: this._headers,
                 };
                 dealWithPlaybackInfo(pbUrl, pbUrl, options);
