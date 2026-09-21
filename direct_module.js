@@ -43,6 +43,7 @@ const dpSleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // 默认开启：直连版就是为了走 PC 播放器；菜单里关掉即回到网页播放
 const dpEnabled = () => dpStore.get(dpKeys.enable, "true") === "true";
 // 直连开关一开就无视「脚本在当前服务器 已禁用」：必须拉起 PC 播放器，不能在网页里播
+// pi-lens-ignore: no-unused-vars
 const dpIntercept = () =>
     dpEnabled() ||
     localStorage.getItem(etlpStorageKeys.webPlayerEnable) != "true";
@@ -264,6 +265,7 @@ const dpProbeList = [
     ["Control/Key", { Key: "^v" }, "20001"],
 ];
 
+// pi-lens-ignore: no-unused-vars
 async function dpJriverProbe() {
     const conf = dpConf();
     const url = dpStore.get(dpKeys.lastUrl, "");
@@ -510,6 +512,7 @@ async function dpMonitor(ctx, poll) {
     await dpReport(ctx, "stop", lastMs, false);
 }
 
+// pi-lens-ignore: no-unused-vars
 async function dpPlay(playbackData, extraData, itemId) {
     const conf = dpConf();
     const mode = dpModeOverride || conf.mode; // 详情页那三个按钮可以临时指定播放器
@@ -608,6 +611,7 @@ async function dpPlay(playbackData, extraData, itemId) {
     return false;
 }
 
+// pi-lens-ignore: no-unused-vars
 function dpShowConfig() {
     const cur = dpConf();
     const mode = prompt(
@@ -653,6 +657,7 @@ function dpShowConfig() {
     );
 }
 
+// pi-lens-ignore: no-unused-vars
 async function dpTestConnection() {
     const conf = dpConf();
     const jrQuery = new URLSearchParams(dpJrAuthParams(conf)).toString();
@@ -804,6 +809,7 @@ function dpSyncDetailButtons() {
     }
 }
 // 菜单「直连播放器: 按钮自检」：不出按钮时把原因一次说清（顺便立刻同步一次，能插上就当场插上）
+// pi-lens-ignore: no-unused-vars
 async function dpButtonCheck() {
     const ver =
         typeof GM_info !== "undefined" && GM_info.script
