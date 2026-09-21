@@ -1,0 +1,16 @@
+embyToLocalPlayer 直连版 (emby-direct-player)
+Copyright 2026 icekale
+
+本仓库是 embyToLocalPlayer 的衍生作品。
+上游：https://github.com/kjtsune/embyToLocalPlayer （Kjtsune，Apache License 2.0）
+上游脚本页：https://greasyfork.org/zh-CN/scripts/448648-embytolocalplayer
+
+我们相对上游做的改动：
+  - 新增 direct_module.js：直连模式（JRiver MCWS / MPC-HC / mpv），不依赖 Python 服务，
+    由浏览器自己把直链交给本机播放器并回传进度
+  - 新增 relay/：Windows 协议中继器 etlp-relay.exe（Go 编写，含原生设置窗口）
+  - 新增 build.py / selftest.mjs：补丁式构建脚本与自检
+  - 上游脚本逻辑未做改写，只在若干插桩点打补丁（插桩点在 build.py 里逐条列明）
+
+上游脚本头部保留其原本的声明（含 `@license MIT`）；本仓库根目录的 LICENSE 是
+上游仓库所使用的 Apache License 2.0 全文，两者都原样保留。

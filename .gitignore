@@ -1,0 +1,16 @@
+# 构建产物
+etlp-relay.exe
+relay/etlp-relay.exe
+*.syso
+
+# 上游脚本缓存（build.py 会自己重新拉）
+upstream.js
+
+# 本地私有（NAS 地址、部署脚本目标等，不进公开仓库）
+NOTES-local.md
+relay/.deploy.env
+
+# 杂项
+*.log
+.DS_Store
+__pycache__/

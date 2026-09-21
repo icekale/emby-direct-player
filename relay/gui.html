@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>embyToLocalPlayer 直连版 · 中继设置</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #fff; --fg: #1b1f24; --dim: #6b7280;
+    --line: #e3e6ea; --accent: #2563eb; --ok: #15803d; --bad: #b91c1c; --code: #f2f4f7;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1216; --card: #161a1f; --fg: #e7eaee; --dim: #9aa3ad;
+      --line: #262c34; --accent: #58a6ff; --ok: #4ade80; --bad: #f87171; --code: #1b2027;
+    }
+  }
+  * { box-sizing: border-box }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg); line-height: 1.55;
+    font: 14px/1.55 -apple-system, "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif;
+  }
+  main { max-width: 860px; margin: 0 auto; padding: 28px 20px 60px }
+  h1 { font-size: 19px; margin: 0 0 4px; letter-spacing: .2px }
+  h1 small { font-weight: 400; color: var(--dim); font-size: 13px; margin-left: 8px }
+  h2 { font-size: 14px; margin: 0 0 14px; color: var(--dim); font-weight: 600; letter-spacing: .3px }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin: 14px 0 }
+  .row { display: grid; grid-template-columns: 78px 1fr auto; gap: 10px; align-items: center; margin-bottom: 8px }
+  .row label { color: var(--dim) }
+  input[type=text] {
+    width: 100%; padding: 7px 10px; border: 1px solid var(--line); border-radius: 7px;
+    background: var(--code); color: var(--fg); font-family: ui-monospace, Consolas, monospace; font-size: 12.5px;
+  }
+  input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: -1px }
+  button {
+    font: inherit; padding: 7px 13px; border: 1px solid var(--line); border-radius: 7px;
+    background: var(--code); color: var(--fg); cursor: pointer;
+  }
+  button:hover { border-color: var(--accent) }
+  button[disabled] { opacity: .5; cursor: default }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600 }
+  .hint { color: var(--dim); font-size: 12.5px; margin: 8px 0 0 }
+  .bar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+  .spacer { flex: 1 }
+  .hit { color: var(--ok) } .miss { color: var(--bad) }
+  .cands { margin: 6px 0 0; padding: 0; list-style: none }
+  .cands li { display: flex; gap: 8px; align-items: center; padding: 3px 0 }
+  .cands code { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--fg);
+                overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+  .proto { display: flex; gap: 10px; padding: 5px 0; border-bottom: 1px dashed var(--line); align-items: baseline }
+  .proto:last-child { border-bottom: 0 }
+  .proto b { font-family: ui-monospace, Consolas, monospace; font-weight: 600; min-width: 92px }
+  .proto span { font-family: ui-monospace, Consolas, monospace; font-size: 12px; color: var(--dim);
+                overflow-wrap: anywhere }
+  pre {
+    background: var(--code); border: 1px solid var(--line); border-radius: 8px; padding: 12px;
+    font-family: ui-monospace, Consolas, monospace; font-size: 12px; white-space: pre-wrap;
+    overflow-wrap: anywhere; max-height: 320px; overflow: auto; margin: 12px 0 0;
+  }
+  pre:empty { display: none }
+  #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); padding: 9px 16px;
+           border-radius: 8px; background: var(--fg); color: var(--bg); font-size: 13px; opacity: 0;
+           transition: opacity .18s; pointer-events: none }
+  #toast.show { opacity: .95 }
+  .busy::after { content: " …" }
+</style>
+</head>
+<body>
+<main>
+  <h1>embyToLocalPlayer 直连版 <small>中继设置 · etlp-relay <span id="ver">?</span></small></h1>
+  <p class="hint" id="where"></p>
+
+  <section>
+    <h2>播放器</h2>
+    <div class="row">
+      <label>MPC-HC</label>
+      <input type="text" id="mpc" placeholder="留空＝自动查找" spellcheck="false">
+      <button data-scan="mpc">找找看</button>
+    </div>
+    <div class="row">
+      <label>mpv</label>
+      <input type="text" id="mpv" placeholder="留空＝自动查找" spellcheck="false">
+      <button data-scan="mpv">找找看</button>
+    </div>
+    <ul class="cands" id="cands"></ul>
+    <div class="bar" style="margin-top:14px">
+      <button class="primary" id="save">保存并注册协议</button>
+      <span class="hint">D 盘 / 移动盘上的便携版不会被自动扫到，把完整路径填进来。</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>协议</h2>
+    <div id="protos"></div>
+    <div class="bar" style="margin-top:14px">
+      <button id="reinstall">重新注册</button>
+      <button id="uninstall">卸载协议</button>
+      <span class="hint">改动后要重启浏览器（Chrome / Edge 只在启动时读协议表）。</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>排查</h2>
+    <div class="bar">
+      <button data-log="relay">etlp-relay.log</button>
+      <button data-log="mpv">mpv.log</button>
+      <button id="selftest">自检</button>
+      <span class="spacer"></span>
+      <button id="opendir">打开所在文件夹</button>
+    </div>
+    <pre id="out"></pre>
+  </section>
+</main>
+<div id="toast"></div>
+
+<script>
+const K = new URLSearchParams(location.search).get('k') || '';
+const $ = s => document.querySelector(s);
+const out = $('#out');
+let toastTimer;
+function toast(msg, bad) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.style.background = bad ? 'var(--bad)' : 'var(--fg)';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+function url(path, params) {
+  const u = new URL(path, location.origin);
+  u.searchParams.set('k', K);
+  for (const [k, v] of Object.entries(params || {})) u.searchParams.set(k, v);
+  return u;
+}
+async function get(path, params) {
+  const r = await fetch(url(path, params));
+  if (!r.ok) throw new Error(await r.text() || r.status);
+  return r.json();
+}
+async function post(path, params) {
+  const r = await fetch(url(path, params), { method: 'POST' });
+  if (!r.ok) throw new Error(await r.text() || r.status);
+  return r.json();
+}
+function show(text) { out.textContent = text; out.scrollTop = 0; }
+async function guard(btn, fn) {
+  if (btn) btn.disabled = true;
+  try { await fn(); } catch (e) { toast(String(e.message || e), true); }
+  finally { if (btn) btn.disabled = false; }
+}
+
+function renderPlayers(s) {
+  $('#mpc').value = s.ini.mpc || '';
+  $('#mpv').value = s.ini.mpv || '';
+  $('#ver').textContent = s.version;
+  $('#where').textContent = '程序：' + s.exe + '　配置：' + s.iniPath;
+  const list = $('#cands');
+  list.innerHTML = '';
+  for (const [who, found] of [['MPC-HC', s.mpc], ['mpv', s.mpv]]) {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="${found ? 'hit' : 'miss'}">${who}</span><code>`
+      + (found || '没找到') + '</code>';
+    list.appendChild(li);
+  }
+}
+function renderProtos(s) {
+  const box = $('#protos');
+  box.innerHTML = '';
+  for (const [scheme, cmd] of Object.entries(s.protocols)) {
+    const d = document.createElement('div');
+    d.className = 'proto';
+    d.innerHTML = `<b>${scheme}</b><span class="${cmd ? 'hit' : 'miss'}">`
+      + (cmd ? '已注册 → ' + cmd : '未注册') + '</span>';
+    box.appendChild(d);
+  }
+}
+async function load() {
+  const s = await get('/api/status');
+  renderPlayers(s); renderProtos(s);
+}
+async function scan(who, btn) {
+  await guard(btn, async () => {
+    btn.classList.add('busy');
+    show('正在扫盘找 ' + who + '.exe …（只扫 C: 和常见安装位置，最多几十秒）\n');
+    const r = await get('/api/scan', { who });
+    btn.classList.remove('busy');
+    if (!r.candidates.length) return show('没扫到 ' + who + '.exe。便携版请手动填完整路径再点「保存并注册协议」。');
+    show('扫到这些（点一行填进去）：\n' + r.candidates.map((c, i) => '  ' + (i + 1) + ') ' + c).join('\n'));
+    const list = $('#cands');
+    list.innerHTML = '';
+    for (const c of r.candidates) {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.textContent = '用这个';
+      const code = document.createElement('code');
+      code.textContent = c;
+      b.onclick = () => { $('#' + who).value = c; toast('已填入，别忘了点「保存并注册协议」'); };
+      li.append(b, code);
+      list.appendChild(li);
+    }
+  });
+}
+document.querySelectorAll('[data-scan]').forEach(b => b.onclick = () => scan(b.dataset.scan, b));
+$('#save').onclick = e => guard(e.target, async () => {
+  const r = await post('/api/save', { mpc: $('#mpc').value.trim(), mpv: $('#mpv').value.trim() });
+  show(r.log); await load();
+  toast(r.ok ? '已保存并注册' : '有报错，看下面的输出', !r.ok);
+});
+$('#reinstall').onclick = e => guard(e.target, async () => {
+  const r = await post('/api/save', { mpc: $('#mpc').value.trim(), mpv: $('#mpv').value.trim() });
+  show(r.log); await load(); toast('协议已重新注册', !r.ok);
+});
+$('#uninstall').onclick = e => guard(e.target, async () => {
+  if (!confirm('删除 etlp-mpc: / etlp-mpv: 两个协议？（配置和 exe 不动）')) return;
+  const r = await post('/api/uninstall');
+  show(r.log); await load(); toast('协议已卸载', !r.ok);
+});
+$('#selftest').onclick = e => guard(e.target, async () => {
+  const r = await post('/api/selftest');
+  show(r.log); toast(r.ok ? '自检通过' : '自检失败', !r.ok);
+});
+document.querySelectorAll('[data-log]').forEach(b => b.onclick = e => guard(e.target, async () => {
+  const r = await get('/api/log', { which: b.dataset.log });
+  show(r.text || '(空)');
+}));
+$('#opendir').onclick = e => guard(e.target, async () => {
+  await get('/api/log', { which: 'relay', open: 1 });
+  toast('已在资源管理器里打开');
+});
+load().catch(e => toast('读不到状态：' + e.message, true));
+</script>
+</body>
+</html>
