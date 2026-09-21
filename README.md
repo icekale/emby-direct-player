@@ -16,7 +16,7 @@
 
 ## 安装
 
-1. Tampermonkey 里导入 `embyToLocalPlayer.direct.user.js`（已含 `@connect localhost` / `@connect *`，不然读不到本地播放器）。
+1. 导入 `embyToLocalPlayer.direct.user.js`（Tampermonkey → 添加新脚本 → 粘贴/导入；或从 [GreasyFork](https://greasyfork.org/zh-CN/scripts/596811-embytolocalplayer-%E7%9B%B4%E8%BF%9E%E7%89%88) 安装，那边跟着这个仓库自动同步）（脚本已含 `@connect localhost` / `@connect *`，不然读不到本地播放器）。
 2. 点油猴菜单 →「直连播放器: 设置」→ 选模式、填地址。
 3. 菜单 →「直连播放器: 测试连接」确认能通。
 4. 菜单 →「直连播放器(MPC-HC/JRiver)」开关打开。
