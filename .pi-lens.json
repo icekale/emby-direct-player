@@ -9,5 +9,10 @@
   },
   "autofix": {
     "enabled": false
+  },
+  "rules": {
+    "no-unused-vars": {
+      "disable": true
+    }
   }
 }
